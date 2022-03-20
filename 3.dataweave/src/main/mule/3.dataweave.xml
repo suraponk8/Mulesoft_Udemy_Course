@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="dataweave_basics" doc:id="da47433a-440a-4dc6-b869-e668b3bf30d4" >
+		<ee:transform doc:name="concatenate two strings into a single string" doc:id="9afe9a6b-416a-4d08-b5e4-d68fd9765d4e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"newString" : ("Hello " ++ " World")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="transform json to xml" doc:id="c1d76a17-77d7-4a19-8b6a-ef266427778e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	"newString" : ("Hello " ++ " World")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="create a variable in dataweave" doc:id="a84a0e90-5689-4355-a74b-882b11e0ed12" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var myVar = {
+	"newString" : ("Hello " ++ " World")	
+}
+
+output application/json
+---
+myVar]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="use dataweave native functions" doc:id="dd1dde5e-da92-4398-8023-796711c5ea33" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var  myVar = {
+	"sum" : sum([1,1,2,3,4,3]),
+	"avg" : avg([2,2,1,2,5,5]),
+	"even" : isEven(4),
+	"uppercase" : upper("Mulesoft"),
+	"timestamp" : now()
+	
+	
+}
+
+output application/json
+---
+myVar]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweave_files" doc:id="6a7177b8-6642-4cd2-9d88-2c47aff855a2" >
+		<ee:transform doc:name="read content file from the classpath" doc:id="55eab0a8-8af1-4fbc-957e-7fbcaf3234f3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+readUrl("classpath://peopleName.json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="create a metadata type and use it as a payyload" doc:id="da3e8986-e833-4308-9e30-ed200f19097e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweave_object_array" doc:id="1b02b7e8-da79-4cf2-95aa-474ffaa19ee3" >
+		<ee:transform doc:name="map elements from an array into an object" doc:id="328e33fb-b446-44c1-9bbb-783863dca70a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customArray = [
+	"Mulesoft",
+	"course",
+	"fundamentals"
+]
+output application/json
+---
+customArray map ((item,index) ->
+	index : item ++ "_" ++ index
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="pluck objects from an object into an array" doc:id="59145ceb-8cd0-4220-adb8-dd73466bee48" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customObj = {
+	"0" : "Mulesoft",
+	"1" : "course",
+	"2" : "fundamentals"
+}
+
+output application/json
+---
+customObj pluck((value) ->
+	value
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="filter an array and return only the matching items" doc:id="f96ebf4c-80a3-4343-b6a4-b8e223ff7356">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+
+var customArray = [1,2,3,4,5,6,7,8,9,10]
+output application/json
+---
+{
+	"collection" :customArray filter((item,index) -> item > 6)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="filter an object and return only the matching items" doc:id="81d99db9-2540-4381-b204-7361507de0e2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+
+var customObj = {
+	"0" : "Mulesoft",
+	"1" : "course",
+	"2" : "fundamentals"
+}
+
+
+output application/json
+---
+{
+	"collection" : customObj filterObject ((value,key) ->
+		(key contains 1) and sizeOf(value) > 4
+	)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweave_selectors_over_objects" doc:id="3e9352b0-b13c-4984-bbf2-b10474d9f6f0" >
+		<ee:transform doc:name="single-value selector over an object" doc:id="bef7d9af-3294-4115-ba6e-d4d0ad28991c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+
+
+var customObj = {
+	"people" : {
+		"person" : {
+			"name" : "John"
+		},
+		"person" : {
+			"name" : "Mary"
+		},
+		"person" : {
+			"name" : "Tim"
+		},
+		"person" : {
+			"name" : "Ann"
+		},
+		"person" : {
+			"name" : "Dora"
+		}
+	}
+}
+
+
+output application/json
+---
+
+/*
+* selectors only return the value of the first matching key , even if the object contains multiple 
+* matching keys
+*/
+
+customObj.people.person]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="multiple-value selector over an object" doc:id="4fe5d030-df69-4a60-8e4e-6a809c209e9e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customObj = {
+	"people" : {
+		"person" : {
+			"name" : "John"
+		},
+		"person" : {
+			"name" : "Mary"
+		},
+		"person" : {
+			"name" : "Tim"
+		},
+		"person" : {
+			"name" : "Ann"
+		},
+		"person" : {
+			"name" : "Dora"
+		}
+	}
+}
+
+
+
+output application/json
+---
+
+/*
+ *  .* returns an array with all the whose key matches the expression
+ * 
+ */
+ 
+customObj.people.*person]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="descendant-value selector over an object" doc:id="79ebe8db-ad5e-45f6-8f35-1d95cf14a3b3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customObj = {
+	"people" : {
+		"person" : {
+			"name" : "John",
+			"address" : {
+				"name" : "address1"
+			}
+		},
+		"person" : {
+			"name" : "Mary",
+			"address" : {
+				"name" : "address2"
+			}
+		},
+		"person" : {
+			"name" : "Tim",
+			"address" : {
+			"name" : "address3"
+			}
+		},
+		"person" : {
+			"name" : "Ann",	
+			"address" : {
+				"name" : "address4"
+			}
+		},
+		"person" : {
+			"name" : "Dora",	
+			"address" : {
+				"name" : "address5"
+			}
+		}
+	}
+}
+
+
+
+output application/json
+---
+
+
+/*
+ * .. retrieves the values of the all matching key-value
+ * pairs in the sub-tree under the selected context
+ * 
+ * 
+ */
+
+customObj.people..name]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="key-value pair selector over an object" doc:id="5c620273-01b7-4060-89d2-7121e3f446a9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customObj = {
+	"people" : {
+		"person" : {
+			"name" : "John"
+		},
+		"person" : {
+			"name" : "Mary"
+		},
+		"person" : {
+			"name" : "Tim"
+		},
+		"person" : {
+			"name" : "Ann"
+		},
+		"person" : {
+			"name" : "Dora"
+		}
+	}
+}
+
+output application/json
+---
+
+/*
+ * .& selector retrieves both the keys and values
+ * of all matching key-pairs in the context
+ * 
+ */
+
+
+customObj.people.*person.&name]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="index selector over an objext" doc:id="8d19d787-7d01-472c-a3ca-c9ec82a8b693" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var customObj = {
+	"people" : {
+		"person" : {
+			"name" : "John"
+		},
+		"person" : {
+			"name" : "Mary"
+		},
+		"person" : {
+			"name" : "Tim"
+		},
+		"person" : {
+			"name" : "Ann"
+		},
+		"person" : {
+			"name" : "Dora"
+		}
+	}
+}
+
+
+output application/json
+---
+/*
+ * the selector returns the value of the key-value pair
+ * at the specific
+ */
+customObj.people[2]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

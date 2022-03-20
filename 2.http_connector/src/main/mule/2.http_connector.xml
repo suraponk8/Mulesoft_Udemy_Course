@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+<mule xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd">
 	<flow name="basics" doc:id="b93ef200-df1f-4d5e-aae2-cc8f019b482e" >
 		<http:listener doc:name="HTTP GET" doc:id="f8c0aab0-5910-4160-bca0-08468e3105e1" config-ref="HTTP_Listener_config" path="/basics/*" allowedMethods="GET">
 			<http:response >
@@ -24,6 +25,11 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 }]]]></http:query-params>
 		</http:request>
 		<logger level="INFO" doc:name="Log END" doc:id="6e1d8ec6-323d-4d93-84a8-059a7fddf3d6" message='#["log END -" ++ flow.name]'/>
+	</flow>
+	<flow name="Assignment_1" doc:id="2075fda7-3d08-4d80-b397-052ba9522609" >
+		<http:listener doc:name="HTTP GET" doc:id="752955d6-eac2-46a0-a491-5679f4aadac0" config-ref="HTTP_Listener_config_assigment" path="/exercise/uriParams/{id}/queryParams/*" allowedMethods="GET"/>
+		<logger level="INFO" doc:name="Log START" doc:id="5377924c-e79d-4661-a694-25ce6261353e" message='#["log START -" ++ flow.name]'/>
+		<set-payload value='#[%dw 2.0&#10;&#10;output application/json&#10;---&#10;{&#10;	"uriParams": attributes.uriParams,&#10;	"queryParams": attributes.queryParams		&#10;}]' doc:name="Set Payload" doc:id="5be6c3bd-601b-42a1-b2b8-54088c9cbe6d" />
 	</flow>
 	<flow name="uriParams" doc:id="7f4ff293-ffbf-42b4-b399-b3227cbe2e72" >
 		<http:listener doc:name="HTTP GET" doc:id="311dd4a5-4b81-4ff9-8317-58a8445a643d" config-ref="HTTP_Listener_config" path="/uriParams/{ID}" allowedMethods="GET"/>
