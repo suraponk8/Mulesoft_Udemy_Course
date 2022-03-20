@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bbae23ba-10f2-46ab-9d91-0fe0b72b9ba8" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
 	<flow name="dataweave_basics" doc:id="da47433a-440a-4dc6-b869-e668b3bf30d4" >
 		<ee:transform doc:name="concatenate two strings into a single string" doc:id="9afe9a6b-416a-4d08-b5e4-d68fd9765d4e" >
 			<ee:message >
@@ -342,6 +346,191 @@ output application/json
  * at the specific
  */
 customObj.people[2]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweave_selectors_over_string" doc:id="94409c1a-9cbf-4259-8c43-f127726978a0" >
+		<ee:transform doc:name="index selector over a string" doc:id="7893067f-419a-4e87-ac09-586dcaf384fa" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var customString = "Mulesoft"
+
+output application/json
+---
+
+/*
+ * the string is broken down into an array, 
+ * where each character is an index
+ */
+customString [0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="range selector over a string" doc:id="7c703793-16a5-441e-ab80-1c6ee9454ec1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customString = "Mulesoft"
+output application/json
+---
+/*
+ * limits the output to only the elements specified
+ * by the range on that specified
+ * 
+ */
+customString[0 to 3]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweave_lambdas_basics" doc:id="da619cff-e255-4cc1-9e4f-beb0559a565a" >
+		<http:listener doc:name="HTTP POST" doc:id="0f4f4f3e-9688-4d71-9b62-f5b1769067ee" config-ref="HTTP_Listener_config" path="/lambdas" allowedMethods="POST"/>
+		<ee:transform doc:name="declare and invoke a function" doc:id="ac560d3d-dbd0-4fec-8a59-da017647eecb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+fun createString(obj) ={
+	description: obj.field1 ++ " " ++ obj.field2 ++ " " ++ obj.field3
+}
+
+output application/json
+---
+{
+	"root" : createString(payload)
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4b2c5236-37ac-41a4-8a9c-a379346aa316" message="#[payload]"/>
+		<ee:transform doc:name="use named parameters in lambda" doc:id="7696718b-0548-4181-80ba-231e47c69756" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var customArray = [1,2,3,4,5,6]
+output application/json
+---
+{
+	"collection" : customArray map ((number) ->
+		(number * 100)
+	)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0e6d2142-6ef7-4fe7-b486-744a37692ff9" message="#[payload]"/>
+		<ee:transform doc:name="use lambda default argument values" doc:id="234db788-950e-4596-b706-137109b2e391" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var customArray = ["Mulesoft","course","fundamentals"]
+
+output application/json
+---
+{
+	"collection" : customArray map (
+		//$$: index , $: item
+		"$$" : $
+	)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweave_lambdas_intermediate" doc:id="b4c1e51a-fda1-4bf5-83bc-174795ce5a19" >
+		<ee:transform doc:name="maps and merges fields from items in separate arrays" doc:id="a4b81aad-5ad2-4688-ba43-e94e6addc7f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var books =[
+	{
+		bookId : 101,
+		title: "mulesoft course",
+		price: "20.00"
+		
+	},
+	{
+		bookId : 202,
+		title: "mulesoft fundamentals",
+		price: "30.00"
+		
+	},
+	{
+		bookId : 303,
+		title: "mulesoft essentials",
+		price: "12.00"
+		
+	}
+	
+]
+
+var authors =[
+	{
+		bookId: 101,
+		author: "surapon kunsri"	
+	},
+	{
+		bookId: 202,
+		author: "tiger wood"	
+	},
+	{
+		bookId: 303,
+		author: "dollar money"	
+	}
+	
+]
+output application/json
+---
+{
+	"booksResult" : books map ((item , index) ->
+	  // create a dynamic variable at the map level	
+	  using(id = item.bookId){
+	  	"id" : id,
+	  	"topic" : item.title,
+	  	"cost" : item.price,
+	    //lets attach the author to the book object 
+	    (
+	    	authors filter ($.*bookId contains id) map(item) ->
+	  		{
+	  			// $.*bookId refers to author array
+	  			"author" : item.author
+	  		}
+	    )
+	  }
+		
+	)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="returns only the values of matching keys within an object" doc:id="56988766-8c9a-4867-8a4c-930bfcd003a4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+
+var booksList =[
+	book:{
+		bookId : 101,
+		title: "mulesoft course",
+		price: "20.00"
+		
+	},
+	book:{
+		bookId : 202,
+		title: "mulesoft fundamentals",
+		price: "30.00"
+		
+	},
+	book:{
+		bookId : 303,
+		title: "mulesoft essentials",
+		price: "12.00"
+		
+	}
+	
+]
+
+
+
+output application/json
+---
+// lets get all the prices > 15.00
+"prices" : booksList.book.*price[?($>15)]
+//? - validates if the key "price" exists
+// and if exists, check if value > 15]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
