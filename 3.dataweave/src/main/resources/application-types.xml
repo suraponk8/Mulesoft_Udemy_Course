@@ -19,6 +19,15 @@ type fieldCourse = {|
 
 ]]></types:shape>
     </types:type>
+    <types:type name="productList" format="json">
+      <types:shape format="weave" example="examples/itemProduct.json"><![CDATA[%dw 2.0
+
+type productList = {|
+  items: Array<{|    item: {|      description: String,       quantity: Number {"typeId": "int"},       unit_price: Number {"typeId": "int"},       toDiscount: String    |}  |}>
+|} {"example": "{\\\"items\\\":[{\\\"item\\\":{\\\"description\\\":\\\"Product1\\\",\\\"quantity\\\":1,\\\"unit_price\\\":20,\\\"toDiscount\\\":\\\"No\\\"}},{\\\"item\\\":{\\\"description\\\":\\\"Product2\\\",\\\"quantity\\\":2,\\\"unit_price\\\":30,\\\"toDiscount\\\":\\\"Yes\\\"}},{\\\"item\\\":{\\\"description\\\":\\\"Product3\\\",\\\"quantity\\\":3,\\\"unit_price\\\":40,\\\"toDiscount\\\":\\\"Yes\\\"}}]}"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#da3e8986-e833-4308-9e30-ed200f19097e">
     <types:processor-declaration>
@@ -34,6 +43,15 @@ type fieldCourse = {|
       <types:input-event>
         <types:message>
           <types:payload type="fieldCourse"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e59ba128-e5ba-4071-a8d7-b7e0bf6797f3">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="productList"/>
         </types:message>
       </types:input-event>
     </types:processor-declaration>

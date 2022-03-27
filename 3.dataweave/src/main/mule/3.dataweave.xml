@@ -534,4 +534,55 @@ output application/json
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="Assignment_2" doc:id="0e486ebf-0176-4b0f-bccb-58282a42e236" >
+		<ee:transform doc:name="Transform Message" doc:id="e59ba128-e5ba-4071-a8d7-b7e0bf6797f3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var  sum_prices_cost = {
+	"amounts" : sum([17, 10, 20, 5, 10]),
+}
+
+var itemsList = {
+	"items":[
+		"item":{
+			"description": "Product1",
+			"quantity": 1,
+			"unit_price": 20,
+			"toDiscount": "No"
+		},
+		"item":{
+			"description": "Product2",
+			"quantity": 2,
+			"unit_price": 35,
+			"toDiscount": "Yes"
+		},
+		"item":{
+			"description": "Product3",
+			"quantity": 3,
+			"unit_price": 40,
+			"toDiscount": "Yes"
+		}
+	]
+}
+
+var products  =	itemsList.items.item filter((value) ->
+		(value.quantity * value.unit_price)  > sum_prices_cost.amounts
+	)
+
+output application/json
+---
+products.*description
+
+	
+
+
+
+
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 </mule>

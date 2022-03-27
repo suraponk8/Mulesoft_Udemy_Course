@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "item": {
+        "description": "Product1",
+        "quantity": 1,
+        "unit_price": 20,
+        "toDiscount": "No"
+      }
+    },
+    {
+      "item": {
+        "description": "Product2",
+        "quantity": 2,
+        "unit_price": 30,
+        "toDiscount": "Yes"
+      }
+    },
+    {
+      "item": {
+        "description": "Product3",
+        "quantity": 3,
+        "unit_price": 40,
+        "toDiscount": "Yes"
+      }
+    }
+  ]
+}
